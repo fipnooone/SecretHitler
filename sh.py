@@ -192,7 +192,7 @@ class Game():
 
             while len(votePlayers) != 0:
                 p = random.choice(votePlayers)
-                if isinstance(p, Liberal):
+                if isinstance(p, Liberal) and p.getInfo().dead == False:
                     if p != self.president["candidate"] and p != self.cancellor["candidate"] and (p.getThoughts()[self.president["candidate"]] > random.randint(50, 90) or p.getThoughts()[self.cancellor["candidate"]] > random.randint(50, 90)):
                         p.voteNein()
                         votes["no"].append(p)
@@ -205,7 +205,7 @@ class Game():
                         p.voteJa()
                         votes["yes"].append(p)
                         votePlayers.remove(p)
-                elif isinstance(p, Hitler):
+                elif isinstance(p, Hitler) and p.getInfo().dead == False:
                     if p != self.president["candidate"] and p != self.cancellor["candidate"] and (p.getThoughts()[self.president["candidate"]] > random.randint(50, 90) or p.getThoughts()[self.cancellor["candidate"]]):
                         p.voteJa()
                         votes["yes"].append(p)
@@ -218,7 +218,7 @@ class Game():
                         p.voteNein()
                         votes["no"].append(p)
                         votePlayers.remove(p)
-                else:
+                elif p.getInfo().dead == False:
                     if (isinstance(self.president["candidate"], Liberal) or isinstance(self.cancellor["candidate"], Liberal)) and random.randint(0, 100) < 15:
                         p.voteJa()
                         votes["yes"].append(p)
@@ -251,7 +251,6 @@ class Game():
         else:
             result = True
 
-        print("votes end")
         return result
 
     def log(self, log_):
@@ -316,11 +315,11 @@ class Game():
                     screen.blit(FONTS["GAME-ORIGINAL-RU-INFO"].render('Пол: ' + sex + ', Возраст: ' + str(self.getPlayers()[i].getInfo().age), True, (53, 54, 49)), (1055, 22 + 67))
                     
                     plus_ = 0
-                    if self.president["candidate"] == self.getPlayers()[i]:
-                        screen.blit(FONTS["GAME-ORIGINAL-RU-INFO"].render('Кандидат в президенты', True, (53, 54, 49)), (1055, 22 + 67 + 17))
+                    if self.president["current"] == self.getPlayers()[i]:
+                        screen.blit(FONTS["GAME-ORIGINAL-RU-INFO"].render('Президент', True, (53, 54, 49)), (1055, 22 + 67 + 17))
                         plus_ = 17
-                    elif self.cancellor["candidate"] == self.getPlayers()[i]:
-                        screen.blit(FONTS["GAME-ORIGINAL-RU-INFO"].render('Кандидат в канцлеры', True, (53, 54, 49)), (1055, 22 + 67 + 17))
+                    elif self.cancellor["current"] == self.getPlayers()[i]:
+                        screen.blit(FONTS["GAME-ORIGINAL-RU-INFO"].render('Канцлер', True, (53, 54, 49)), (1055, 22 + 67 + 17))
                         plus_ = 17
                     elif self.president["was"] == self.getPlayers()[i]:
                         screen.blit(FONTS["GAME-ORIGINAL-RU-INFO"].render('Был президентом', True, (53, 54, 49)), (1055, 22 + 67 + 17))
@@ -332,6 +331,10 @@ class Game():
                     if isinstance(self.getPlayers()[i], Liberal):
                         screen.blit(FONTS["GAME-ORIGINAL-RU-INFO"].render('Партия: Либерал', True, (53, 54, 49)), (1055, 22 + 67 + 17 + plus_))
                     
+                    if self.getPlayers()[i].getInfo().dead:
+                        screen.blit(FONTS["GAME-ORIGINAL-RU-INFO"].render('Мертв.', True, (53, 54, 49)), (1055, 22 + 67 + 17*6 + plus_))
+                        plus_ = 14
+
                     if isinstance(self.getPlayers()[i], Liberal) or isinstance(self.getPlayers()[i], Hitler):
                         screen.blit(FONTS["GAME-ORIGINAL-RU-INFO"].render('Мысли:', True, (53, 54, 49)), (1055, 22 + 67 + 17*6 + 4 + plus_))
 
@@ -347,20 +350,18 @@ class Game():
                     screen.blit(FONTS["GAME-ORIGINAL-RU-INFO"].render('Красноречие: ' + str(self.getPlayers()[i].getInfo().eloquence), True, (53, 54, 49)), (1055, 22 + 67 + 17*3 + plus_))
                     screen.blit(FONTS["GAME-ORIGINAL-RU-INFO"].render('Удача: ' + str(self.getPlayers()[i].getInfo().luck), True, (53, 54, 49)), (1055, 22 + 67 + 17*4 + plus_))
                     screen.blit(FONTS["GAME-ORIGINAL-RU-INFO"].render('Понимание игры: ' + str(self.getPlayers()[i].getInfo().smart), True, (53, 54, 49)), (1055, 22 + 67 + 17*5 + plus_))
-                    if self.getPlayers()[i].getInfo().dead:
-                        screen.blit(FONTS["GAME-ORIGINAL-RU-INFO"].render('Мертв.', True, (53, 54, 49)), (1055, 22 + 67 + 17*6 + plus_))
 
                 screen.blit(FONTS["GAME-ORIGINAL"].render('PLAYER', True, color), (60, 20 + 60*i))
                 screen.blit(FONTS["GAME-ORIGINAL-NUM"].render(str(self.getPlayers()[i].getInfo().id), True, color), (145, 15 + 60*i))
 
                 if self.getPlayers()[i].getVote() != None:
-                    if self.getPlayers()[i].getVote():
+                    if self.getPlayers()[i].getVote() and self.getPlayers()[i].getInfo().dead == False:
                         if self.showVotes:
                             screen.blit(IMGS["VOTE-JA"], (17, 24 + 60*i))
                             
                         else:
                             screen.blit(grayscale(IMGS["VOTE-JA"]), (17, 24 + 60*i))
-                    elif self.getPlayers()[i].getVote() == False:
+                    elif self.getPlayers()[i].getVote() == False and self.getPlayers()[i].getInfo().dead == False:
                         if self.showVotes:
                             screen.blit(IMGS["VOTE-NEIN"], (17, 24 + 60*i))
                         else:
@@ -472,22 +473,16 @@ class Game():
                     self.cancellor["was"] = self.cancellor["current"] 
 
                 if self.president["was"] == None and self.president["candidate"] == None:
-                    print("- 4")
                     self.president["candidate"] = self.getPlayers()[0]
                     self.log2("Выборы, кандидат в президенты", "Player " + str(self.getPlayers()[0].getInfo().id))
                     time.sleep(3)
                     votesResult = self.votes(self.getPlayers()[0])
             
                 else:
-                    print("- 1")
-
                     if self.getPlayers().index(self.president["candidate"]) + 1 >= len(self.getPlayers()):
-                        print(self.getPlayers().index(self.president["candidate"]), len(self.getPlayers()))
                         nextone = self.getPlayers()[0]
-                        print("- 2")
                     else:
                         nextone = self.getPlayers()[self.getPlayers().index(self.president["candidate"]) + 1]
-                        print("- 3")
                     self.president["candidate"] = nextone
                     self.log2("Выборы, кандидат в президенты", "Player " + str(nextone.id))
                     time.sleep(3)
@@ -504,8 +499,8 @@ class Game():
 
                 cards = [self.laws[0], self.laws[1], self.laws[2]]
                 self.laws.pop(0)
-                self.laws.pop(1)
-                self.laws.pop(2)
+                self.laws.pop(0)
+                self.laws.pop(0)
 
                 self.log("Президент взял 3 карты")
                 time.sleep(1)
@@ -553,7 +548,7 @@ class Game():
                 self.log2("Канцлер скинул карту,", "Другую положил на стол")
                 time.sleep(1)
 
-                if lastLaw != self.applied_laws["fascist"] and ((self.applied_laws["fascist"] == 1 or self.applied_laws["fascist"] == 2) and len(self.getPlayers()) >= 9) or (self.applied_laws["fascist"] == 2 and (len(self.getPlayers()) == 8 or len(self.getPlayers()) == 7)):
+                if lastLaw != self.applied_laws["fascist"] and (((self.applied_laws["fascist"] == 1 or self.applied_laws["fascist"] == 2) and len(self.getPlayers()) >= 9) or (self.applied_laws["fascist"] == 2 and (len(self.getPlayers()) == 8 or len(self.getPlayers()) == 7))):
                     if isinstance(self.president["current"], Liberal):
                         si = 0
                         suspect = sorted(self.president["current"].getThoughts().items(), key=lambda i: i[1], reverse=True)[si][0]
@@ -613,7 +608,6 @@ class Game():
                             for p in self.getPlayers():
                                 if (isinstance(p, Liberal) or isinstance(p, Hitler)) and p != self.president["current"] and suspect in p.getThoughts():
                                     newThoughtsP = p.getThoughts()
-                                    print(str(suspect.id))
                                     newThoughtsP[suspect] += random.randint(-2, 10)
                                     p.changeThoughts(newThoughtsP)
                         if isinstance(suspect, Fascist) or isinstance(suspect, Hitler):
@@ -624,35 +618,29 @@ class Game():
                                     p.changeThoughts(newThoughtsP)
                         time.sleep(1)
                         self.log("Президент проверил Player " + str(suspect.id))              
-                if lastLaw != self.applied_laws["fascist"] and self.applied_laws["fascist"] == 3 and (len(self.getPlayers()) >= 7 and len(self.getPlayers()) <= 10):
+                if lastLaw != self.applied_laws["fascist"] and (self.applied_laws["fascist"] == 3 and (len(self.getPlayers()) >= 7 and len(self.getPlayers()) <= 10)):
                     if isinstance(self.president["current"], Liberal):
                         nextoneF = sorted(self.president["current"].getThoughts().items(), key=lambda i: i[1])[0][0]
                     elif isinstance(self.president["current"], Hitler):
                         nextoneF = sorted(self.president["current"].getThoughts().items(), key=lambda i: i[1])[-1][0]
                     elif isinstance(self.president["current"], Fascist):
                         nextoneF = random.choice(self.getPlayers())
-                        print(nextoneF)
-                        while (isinstance(nextoneF, Fascist)) or (isinstance(nextoneF, Hitler)):
-                            print(nextoneF)
+                        while isinstance(nextone, Liberal):
                             nextoneF = random.choice(self.getPlayers())
                     forcepresident = nextoneF
                     self.log("Президент выбрал следующим Player " + str(nextoneF.id))
-                if lastLaw != self.applied_laws["fascist"] and self.applied_laws["fascist"] == 4 or self.applied_laws["fascist"] == 5:
+                if lastLaw != self.applied_laws["fascist"] and (self.applied_laws["fascist"] == 4 or self.applied_laws["fascist"] == 5):
                     if isinstance(self.president["current"], Liberal):
                         pki = sorted(self.president["current"].getThoughts().items(), key=lambda i: i[1], reverse=True)[0][0]
                         pki.kill()
-                        print(pki.id)
                     elif isinstance(self.president["current"], Hitler):
-                        pki = sorted(self.president["current"].getThoughts().items(), key=lambda i: i[1])[-1][0]
+                        pki = sorted(self.president["current"].getThoughts().items(), key=lambda i: i[1], reverse=True)[-1][0]
                         pki.kill()
-                        print(pki.id)
                     elif isinstance(self.president["current"], Fascist):
                         pki = random.choice(self.getPlayers())
-                        while isinstance(nextone, Fascist) or isinstance(nextone, Hitler):
-                            print(pki.id)
+                        while isinstance(pki, Liberal):
                             pki = random.choice(self.getPlayers())
                         pki.kill()
-                        print(pki.id)
                     self.log("Президент убил Player " + str(pki.id))
                 lastLaw = self.applied_laws["fascist"]
 
@@ -668,13 +656,13 @@ class Game():
 
             time.sleep(1)
             if self.applied_laws["liberal"] == 5:
-                self.log2("Игра окончена!", "Победили либералы")
+                self.log2("Игра окончена!", "Победили либералы1")
                 break
             elif self.applied_laws["fascist"] == 6:
-                self.log2("Игра окончена!", "Победили фашисты")
+                self.log2("Игра окончена!", "Победили фашисты2")
                 break
             elif self.applied_laws["fascist"] > 3 and isinstance(self.cancellor["current"], Hitler):
-                self.log2("Игра окончена!", "Победили фашисты")
+                self.log2("Игра окончена!", "Победили фашисты3")
                 break
             else:
                 hd = False
@@ -682,7 +670,7 @@ class Game():
                     if isinstance(p, Hitler) and p.getInfo().dead == True:
                         hd = True
                 if hd:
-                    self.log2("Игра окончена!", "Победили либералы")
+                    self.log2("Игра окончена!", "Победили либералы4")
                     break
 def newPlayerInfo():
     return [random.choice([1, 2]), random.randint(14, 45), random.randint(10, 100), random.randint(10, 100), random.randint(10, 100), random.randint(10, 100)]
