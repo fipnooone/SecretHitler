@@ -317,6 +317,7 @@ class Game():
                     screen.blit(FONTS["GAME-ORIGINAL-RU-INFO"].render('Пол: ' + sex + ', Возраст: ' + str(self.getPlayers()[i].getInfo().age), True, (53, 54, 49)), (1055, 22 + 67))
                     
                     plus_ = 0
+                    deadplus_ = 0
                     if self.president["current"] == self.getPlayers()[i]:
                         screen.blit(FONTS["GAME-ORIGINAL-RU-INFO"].render('Президент', True, (53, 54, 49)), (1055, 22 + 67 + 17))
                         plus_ = 17
@@ -334,15 +335,15 @@ class Game():
                         screen.blit(FONTS["GAME-ORIGINAL-RU-INFO"].render('Партия: Либерал', True, (53, 54, 49)), (1055, 22 + 67 + 17 + plus_))
                     
                     if self.getPlayers()[i].getInfo().dead:
-                        screen.blit(FONTS["GAME-ORIGINAL-RU-INFO"].render('Мертв.', True, (53, 54, 49)), (1055, 22 + 67 + 17*7 + plus_))
-                        plus_ = 34
+                        screen.blit(FONTS["GAME-ORIGINAL-RU-INFO"].render('Мертв.', True, (53, 54, 49)), (1055, 22 + 67 + 17*6 + plus_))
+                        deadplus_ = 17
 
                     if isinstance(self.getPlayers()[i], Liberal) or isinstance(self.getPlayers()[i], Hitler):
-                        screen.blit(FONTS["GAME-ORIGINAL-RU-INFO"].render('Мысли:', True, (53, 54, 49)), (1055, 22 + 67 + 17*6 + 4 + plus_))
+                        screen.blit(FONTS["GAME-ORIGINAL-RU-INFO"].render('Мысли:', True, (53, 54, 49)), (1055, 22 + 67 + 17*6 + 4 + plus_ + deadplus_))
 
                         for j in range(len(self.getPlayers()[i].getThoughts().keys())):
                             p_ = list(self.getPlayers()[i].getThoughts().keys())[j]
-                            screen.blit(FONTS["GAME-ORIGINAL-RU-INFO"].render('Игрок ' + str(p_.getInfo().id) + ': фашист ~' + str(self.getPlayers()[i].getThoughts()[p_]) + '%', True, (53, 54, 49)), (1058, 22 + 67 + 17*7 + 4 + 18*j + plus_))
+                            screen.blit(FONTS["GAME-ORIGINAL-RU-INFO"].render('Игрок ' + str(p_.getInfo().id) + ': фашист ~' + str(self.getPlayers()[i].getThoughts()[p_]) + '%', True, (53, 54, 49)), (1058, 22 + 67 + 17*7 + 4 + 18*j + plus_ + deadplus_))
 
                     elif isinstance(self.getPlayers()[i], Fascist):
                         screen.blit(FONTS["GAME-ORIGINAL-RU-INFO"].render('Партия: Фашист', True, (53, 54, 49)), (1055, 22 + 67 + 17 + plus_))
