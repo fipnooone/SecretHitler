@@ -231,6 +231,8 @@ class Game():
                         p.voteJa()
                         votes["yes"].append(p)
                         votePlayers.remove(p)
+                elif p.getInfo().dead:
+                    votePlayers.remove(p)
                 time.sleep(1)
         
             self.showVotes = True
@@ -332,8 +334,8 @@ class Game():
                         screen.blit(FONTS["GAME-ORIGINAL-RU-INFO"].render('Партия: Либерал', True, (53, 54, 49)), (1055, 22 + 67 + 17 + plus_))
                     
                     if self.getPlayers()[i].getInfo().dead:
-                        screen.blit(FONTS["GAME-ORIGINAL-RU-INFO"].render('Мертв.', True, (53, 54, 49)), (1055, 22 + 67 + 17*6 + plus_))
-                        plus_ = 14
+                        screen.blit(FONTS["GAME-ORIGINAL-RU-INFO"].render('Мертв.', True, (53, 54, 49)), (1055, 22 + 67 + 17*7 + plus_))
+                        plus_ = 34
 
                     if isinstance(self.getPlayers()[i], Liberal) or isinstance(self.getPlayers()[i], Hitler):
                         screen.blit(FONTS["GAME-ORIGINAL-RU-INFO"].render('Мысли:', True, (53, 54, 49)), (1055, 22 + 67 + 17*6 + 4 + plus_))
@@ -656,13 +658,13 @@ class Game():
 
             time.sleep(1)
             if self.applied_laws["liberal"] == 5:
-                self.log2("Игра окончена!", "Победили либералы1")
+                self.log2("Игра окончена!", "Победили либералы")
                 break
             elif self.applied_laws["fascist"] == 6:
-                self.log2("Игра окончена!", "Победили фашисты2")
+                self.log2("Игра окончена!", "Победили фашисты")
                 break
             elif self.applied_laws["fascist"] > 3 and isinstance(self.cancellor["current"], Hitler):
-                self.log2("Игра окончена!", "Победили фашисты3")
+                self.log2("Игра окончена!", "Победили фашисты")
                 break
             else:
                 hd = False
@@ -670,7 +672,7 @@ class Game():
                     if isinstance(p, Hitler) and p.getInfo().dead == True:
                         hd = True
                 if hd:
-                    self.log2("Игра окончена!", "Победили либералы4")
+                    self.log2("Игра окончена!", "Победили либералы")
                     break
 def newPlayerInfo():
     return [random.choice([1, 2]), random.randint(14, 45), random.randint(10, 100), random.randint(10, 100), random.randint(10, 100), random.randint(10, 100)]
